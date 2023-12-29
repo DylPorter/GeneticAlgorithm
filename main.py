@@ -1,17 +1,17 @@
 import random
-# import pygame
-#
-# WIDTH = 100
-# HEIGHT = 100
-#
-# pygame.init()
-# screen = pygame.display.set_mode((WIDTH, HEIGHT))
+import pygame
+
+WIDTH = 1000
+HEIGHT = 1000
+
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # should you pass global constants in functions?
 MIN_FITNESS = 10
 GENOME_LENGTH = 8
-POP_SIZE = 100
-MUTATION_CHANCE = 0.05
+POP_SIZE = 100  # Algorithm runs slowly with large population sizes (i.e. 1000+)
+MUTATION_CHANCE = 0.01
 
 
 class Organism:
@@ -53,71 +53,71 @@ class Organism:
 
         self.genome[index] = new_gene
 
-#    def spawn_position(self):
-#        self.location = [random.randint(0, WIDTH), random.randint(0, HEIGHT)]
-#
-#    def movement(genome):
-#        for i in genome:
-#            if i == 0:
-#                self.location[0] += 1  # Move Up
-#            elif i == 1:
-#                self.location[0] -= 1  # Move Down
-#            elif i == 2:
-#                self.location[1] += 1  # Move Right
-#            elif i == 3:
-#                self.location[2] -= 1  # Move Left
-#            elif i == 4:
-#                pass                   # Do Nothing
+    def spawn_position(self):
+        self.location = [random.randint(0, WIDTH), random.randint(0, HEIGHT)]
+
+    def movement(genome):
+        for i in genome:
+            if i == 0:
+                self.location[0] += 1  # Move Up
+            elif i == 1:
+                self.location[0] -= 1  # Move Down
+            elif i == 2:
+                self.location[1] += 1  # Move Right
+            elif i == 3:
+                self.location[2] -= 1  # Move Left
+            elif i == 4:
+                pass                   # Do Nothing
 
 
-def main():
-    # Generation counter
-    count = 0
+class StateMachine:
+    def __init__(self):
+        self.load_state = "visualiser"
+        self.running = True
+        self.clock = pygame.time.Clock()
 
-    # Generate the starting population
-    population = []
-    initialise_population(population)
+    def run_algorithm(self, population, count):
+        # Population fitness & selection
+        fitness = []
+        population = population_selection(population, fitness)
 
-    start_generation(population, count)
+        print(sorted(fitness))
+        print(f"Survivors: {len(population)} (Gen {count})")
 
+        # Find pairs of fit organisms to generate new offspring
+        new_population = []
 
-def start_generation(population, count):
-    # Population fitness & selection
-    fitness = []
-    population = population_selection(population, fitness)
+        for i in range(POP_SIZE):
+            child = generate_offspring(select_pair(population, fitness))
+            new_population.append(child)
 
-    print(fitness)
-    print(f"Survivors: {len(population)} (Gen {count})")
-
-    # Find pairs of fit organisms to generate new offspring
-    new_population = []
-
-    for i in range(POP_SIZE):
-        child = generate_offspring(select_pair(population, fitness))
-        new_population.append(child)
-
-    population = new_population
-
-    next_generation = input("\n(0 to quit, else continue): ")
-    
-    if next_generation == '0':
-        pass
-    else:
+        population = new_population
         count += 1
-        start_generation(population, count)
 
-#    running = True
-#    clock = pygame.time.Clock()
-#
-#    while running:
-#        clock.tick(60)
-#        screen.fill(0,0,0)
-#        pygame.display.update()
-#
-#        for event in pygame.event.get():
-#            if event.type == pygame.QUIT:
-#                running = False
-#    pygame.quit()
+    def run_visualiser(self):
+        screen.fill((255, 255, 255))
+
+    def main(self):
+        # Generation counter
+        count = 0
+
+        # Generate the starting population
+        population = []
+        initialise_population(population)
+        
+        while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = false
+
+            if self.load_state == "visualiser":
+                self.run_visualiser()
+
+            elif self.load_state == "algorithm":
+                self.run_algorithm(population, count)
+                self.load_state = "visualiser"
+
+            pygame.display.flip()
 
 
 def initialise_population(population):
@@ -161,4 +161,5 @@ def generate_offspring(parent):
 
 
 if __name__ == "__main__":
-    main()
+    app = StateMachine()
+    app.main()
