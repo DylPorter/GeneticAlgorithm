@@ -7,7 +7,6 @@ HEIGHT = 1000
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-# should you pass global constants in functions?
 MIN_FITNESS = 10
 GENOME_LENGTH = 8
 POP_SIZE = 100  # Algorithm runs slowly with large population sizes (i.e. 1000+)
@@ -18,7 +17,7 @@ class Organism:
     def __init__(self):
         self.genome = []
         self.fitness = 0
-        # self.location = [0, 0]
+        self.location = [0, 0]
 
     def initialise_genome(self):
         for i in range(GENOME_LENGTH):
@@ -91,11 +90,15 @@ class StateMachine:
             child = generate_offspring(select_pair(population, fitness))
             new_population.append(child)
 
-        population = new_population
         count += 1
+
+        return new_population, count
 
     def run_visualiser(self):
         screen.fill((255, 255, 255))
+
+        if pygame.key.get_pressed()[pygame.K_SPACE]:
+            self.load_state = "algorithm"
 
     def main(self):
         # Generation counter
@@ -114,8 +117,14 @@ class StateMachine:
                 self.run_visualiser()
 
             elif self.load_state == "algorithm":
-                self.run_algorithm(population, count)
-                self.load_state = "visualiser"
+                start = input("0 to quit, else continue: ")
+
+                if start != "0":
+                    population, count = self.run_algorithm(population, count)
+
+                if pygame.key.get_pressed()[pygame.K_l]:
+                    self.load_state = "visualiser"
+
 
             pygame.display.flip()
 
